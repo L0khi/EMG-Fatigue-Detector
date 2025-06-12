@@ -1,44 +1,71 @@
-# 🧠 EMG Fatigue Detector – Biosignal-Based Muscle Fatigue Classification
+# 🧠 EMG Fatigue Detector (Prototype, 2025)
 
-This project explores the feasibility of using **electromyography (EMG)** signals to detect early signs of muscle fatigue in physically intensive tasks. It is designed as a **baseline biomedical signal processing prototype** simulating occupational stress scenarios in fields like skilled trades, healthcare, and ergonomic research.
+**Signal-Based Fatigue Classification using EMG Features**
 
----
-
-## 📌 Objective
-
-Develop a data-driven pipeline that:
-- Preprocesses EMG time-series signals
-- Extracts relevant features (RMS, mean/median frequency, FFT power)
-- Trains a machine learning classifier to distinguish fatigued vs. non-fatigued states
-
-This prototype serves as a starting point for **fatigue risk detection systems** in workplace injury prevention, rehabilitation monitoring, and human performance research.
+This project analyzes Electromyography (EMG) signals to detect signs of muscle fatigue using domain-informed feature extraction and machine learning classification. It leverages a real-world biomedical dataset (NinaPro DB2) with signals captured across 49 hand gestures from multiple subjects.
 
 ---
 
-## 🧠 Key Techniques
+## 📂 Dataset
 
-| Component              | Description |
-|------------------------|-------------|
-| **Signal Processing**  | RMS, FFT, Median/Mean Frequency |
-| **ML Model**           | XGBoost Classifier (baseline) |
-| **Evaluation**         | ROC-AUC, Confusion Matrix, F1-score |
-| **Preprocessing**      | Scaling, artifact removal, segmentation |
-| **Tools**              | Python, NumPy, SciPy, Matplotlib, Scikit-learn, XGBoost |
+- **Source:** [NinaPro DB2](https://ninapro.hevs.ch/instructions/DB2.html)
+- **Format:** `.mat` files containing:
+  - `emg`: Raw EMG signal (12 channels)
+  - `restimulus`: Task/gesture label
+  - `repetition`: Repetition number
+  - Additional: `acc`, `glove`, `inclin`, etc.
+
+- **Fatigue Labels:** Simulated dynamically using repetition counts and signal windows, validated using RMS and MDF trend behaviors from fatigue literature.
+
+---
+
+## 🔬 Feature Engineering
+
+Features are extracted per EMG window (200 ms sliding with 50% overlap):
+
+| Domain          | Features                                 |
+|-----------------|-------------------------------------------|
+| Time            | RMS, MAV, Zero Crossing, WL, SSC         |
+| Frequency       | Median Frequency (MDF), Mean Frequency   |
+| Time-Frequency  | Band Power (Wavelets), STFT-based energy |
+| Statistical     | Variance, Std, Kurtosis, Skewness        |
+
+Combined 60+ features per window.
 
 ---
 
-## 🔬 Results Summary
+## 🧠 Model Training
 
-This prototype model was trained and tested on pre-labeled EMG data from multiple sessions. Due to signal complexity, label noise, and minimal domain-specific filtering, this version achieves **baseline classification metrics** as shown below.
+| Model           | Details                          |
+|-----------------|----------------------------------|
+| Classifier      | XGBoost                          |
+| Balancing       | Stratified undersampling (equal fatigue classes) |
+| Train-Test Split| 80/20 stratified                 |
 
-| Metric         | Value     |
-|----------------|-----------|
-| Accuracy       | 62.0%     |
-| Precision (1)  | 63%       |
-| Recall (1)     | 59%       |
-| F1-Score (1)   | 61%       |
-| ROC-AUC        | 0.6724    |
-
-> ⚠️ **Note**: These results reflect an early-stage exploration without full calibration or sensor placement optimization. The goal is to demonstrate the **pipeline feasibility**, not production-readiness.
+Final Class Distribution: Fatigue(1): 50%, Non-Fatigue(0): 50%
 
 ---
+
+## 🧪 Results (Balanced Test Set)
+
+| Metric        | Value     |
+|---------------|-----------|
+| Accuracy      | **96.0%** |
+| Precision     | 0.98 / 0.94 |
+| Recall        | 0.93 / 0.98 |
+| ROC-AUC       | **0.9929** |
+
+📈 *Classification performance reflects realistic intra-subject variability and window-level fatigue transitions.*
+
+---
+
+## 📊 Visualizations
+
+- Confusion matrix
+- Fatigue trend over repetitions
+- RMS & MDF dynamic visualization per gesture
+
+---
+
+## 📁 Folder Structure
+
